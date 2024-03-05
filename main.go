@@ -92,7 +92,7 @@ func displayTable(minutes, hours, daysOfMonth, months, daysOfWeek []int, command
 	dayOfWeekLine := "day of week" + strings.Repeat(" ", 14-len("day of week")) + dayOfWeekText
 	commandLine := "command" + strings.Repeat(" ", 14-len("command")) + command
 
-	fmt.Printf("%s\n%s\n%s\n%s\n%s\n%s",
+	fmt.Printf("%s\n%s\n%s\n%s\n%s\n%s\n",
 		minuteLine, hourLine, dayOfMonthLine, monthLine, dayOfWeekLine, commandLine,
 	)
 }
