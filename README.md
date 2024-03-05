@@ -33,7 +33,7 @@ Or run the command directly
 ~$ go run main.go ＂*/15 0 1,15 * 1-5 /usr/bin/cmd＂
 ```
 
-This should dispplay the following output
+This should display the following output
 ```
 minute        0 15 30 45
 hour          0
