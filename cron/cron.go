@@ -22,11 +22,12 @@ func ExtractValuesInInterval(kind string, data string, minValue, maxValue int) (
 		if err != nil {
 			return nil, fmt.Errorf("failed to get %s value: %w", kind, err)
 		}
-		// start with 0
+		// start with min value
 		values = append(values, minValue)
 		var validValue int
 		for validValue < maxValue-extractedValue {
 			validValue += extractedValue
+			// append until max value is exceeded
 			values = append(values, validValue)
 		}
 	case strings.Contains(data, ","):
