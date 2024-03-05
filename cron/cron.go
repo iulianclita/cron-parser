@@ -13,7 +13,7 @@ func ExtractValuesInInterval(kind string, data string, minValue, maxValue int) (
 	var values []int
 	switch {
 	case data == "*":
-		for i := range maxValue {
+		for i := minValue; i <= maxValue; i++ {
 			values = append(values, i)
 		}
 	case strings.HasPrefix(data, "*/"):
