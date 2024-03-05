@@ -7,19 +7,24 @@ import (
 	"github.com/iulianclita/cron-parser/cron"
 )
 
-func TestExtractMinutes(t *testing.T) {
+func TestExtractValuesInInterval(t *testing.T) {
 	testCases := map[string]struct {
 		input     string
+		min, max  int
 		values    []int
 		wantError bool
 	}{
 		"invalid input": {
 			input:     "invalid input",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
 		"input is all values (*)": {
 			input: "*",
+			min:   0,
+			max:   59,
 			values: []int{
 				0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 				11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -32,56 +37,78 @@ func TestExtractMinutes(t *testing.T) {
 		},
 		"input is of type */x but x is not a number:": {
 			input:     "*/not-a-number",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
-		"input is of type */x but x is not between 0-59:": {
+		"input is of type */x but x is not between min and max:": {
 			input:     "*/99",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
 		"input is of type */x and x is valid": {
 			input:     "*/15",
+			min:       0,
+			max:       59,
 			values:    []int{0, 15, 30, 45},
 			wantError: false,
 		},
 		"input is of type x,y,z but z is not a number": {
 			input:     "10,20,not-a-number",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
-		"input is of type x,y,z but z is not between 0-59": {
+		"input is of type x,y,z but z is not between min and max": {
 			input:     "10,20,99",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
 		"input is of type x,y,z and all values are valid": {
 			input:     "10,20,30",
+			min:       0,
+			max:       59,
 			values:    []int{10, 20, 30},
 			wantError: false,
 		},
 		"input is of type x-y but z is not a number": {
 			input:     "10-notANumber",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
-		"input is of type x-y but z is not between 0-59": {
+		"input is of type x-y but z is not between min and max": {
 			input:     "10-99",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
 		"input is of type x-y and all values are valid": {
 			input:     "10-20",
+			min:       0,
+			max:       59,
 			values:    []int{10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			wantError: false,
 		},
 		"input is not a valid number": {
 			input:     "xxx",
+			min:       0,
+			max:       59,
 			values:    nil,
 			wantError: true,
 		},
 		"input is a valid number": {
 			input:     "30",
+			min:       0,
+			max:       59,
 			values:    []int{30},
 			wantError: false,
 		},
@@ -89,7 +116,7 @@ func TestExtractMinutes(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			gotValues, err := cron.ExtractMinutes(tc.input)
+			gotValues, err := cron.ExtractValuesInInterval("minute", tc.input, tc.min, tc.max)
 			if tc.wantError && err == nil {
 				t.Fatalf("expected error but got no error")
 			}

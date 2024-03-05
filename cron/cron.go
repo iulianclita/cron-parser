@@ -9,81 +9,81 @@ import (
 
 var reNumber = regexp.MustCompile(`^\d+$`)
 
-func ExtractMinutes(data string) ([]int, error) {
-	var minutes []int
+func ExtractValuesInInterval(kind string, data string, minValue, maxValue int) ([]int, error) {
+	var values []int
 	switch {
 	case data == "*":
-		for i := range 60 {
-			minutes = append(minutes, i)
+		for i := range maxValue {
+			values = append(values, i)
 		}
 	case strings.HasPrefix(data, "*/"):
-		minuteData := data[2:]
-		minuteValue, err := getMinuteValue(minuteData)
+		valueData := data[2:]
+		extractedValue, err := getValueInInterval(valueData, minValue, maxValue)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get minute value: %w", err)
+			return nil, fmt.Errorf("failed to get %s value: %w", kind, err)
 		}
 		// start with 0
-		minutes = append(minutes, 0)
-		var validMinute int
-		for validMinute < 60-minuteValue {
-			validMinute += minuteValue
-			minutes = append(minutes, validMinute)
+		values = append(values, minValue)
+		var validValue int
+		for validValue < maxValue-extractedValue {
+			validValue += extractedValue
+			values = append(values, validValue)
 		}
 	case strings.Contains(data, ","):
-		for _, minuteData := range strings.Split(data, ",") {
-			minuteData = strings.TrimSpace(minuteData)
-			minuteValue, err := getMinuteValue(minuteData)
+		for _, valueData := range strings.Split(data, ",") {
+			valueData = strings.TrimSpace(valueData)
+			extractedValue, err := getValueInInterval(valueData, minValue, maxValue)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get minute value: %w", err)
+				return nil, fmt.Errorf("failed to get %s value: %w", kind, err)
 			}
-			minutes = append(minutes, minuteValue)
+			values = append(values, extractedValue)
 		}
 	case strings.Contains(data, "-"):
-		minuteData := strings.Split(data, "-")
-		if len(minuteData) != 2 {
-			return nil, fmt.Errorf("minute interval should contain only 2 values: start and end")
+		valueData := strings.Split(data, "-")
+		if len(valueData) != 2 {
+			return nil, fmt.Errorf("%s interval should contain only 2 values: start and end", kind)
 		}
 
-		startMinuteData := strings.TrimSpace(minuteData[0])
-		startMinuteValue, err := getMinuteValue(startMinuteData)
+		startValueData := strings.TrimSpace(valueData[0])
+		startExtractedValue, err := getValueInInterval(startValueData, minValue, maxValue)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get start minute value: %w", err)
+			return nil, fmt.Errorf("failed to get start %s value: %w", kind, err)
 		}
-		endMinuteData := strings.TrimSpace(minuteData[1])
-		endMinuteValue, err := getMinuteValue(endMinuteData)
+		endValueData := strings.TrimSpace(valueData[1])
+		endExtractedValue, err := getValueInInterval(endValueData, minValue, maxValue)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get end minute value: %w", err)
+			return nil, fmt.Errorf("failed to get end %s value: %w", kind, err)
 		}
 
-		if startMinuteValue > endMinuteValue {
-			return nil, fmt.Errorf("start minute (%d) cannot be smaller than end minute (%d)", startMinuteValue, endMinuteValue)
+		if startExtractedValue > endExtractedValue {
+			return nil, fmt.Errorf("start %s (%d) cannot be smaller than end minute (%d)", kind, startExtractedValue, endExtractedValue)
 		}
 
-		for i := startMinuteValue; i <= endMinuteValue; i++ {
-			minutes = append(minutes, i)
+		for i := startExtractedValue; i <= endExtractedValue; i++ {
+			values = append(values, i)
 		}
 	case reNumber.MatchString(data):
-		value, err := getMinuteValue(data)
+		value, err := getValueInInterval(data, minValue, maxValue)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get minute value: %w", err)
+			return nil, fmt.Errorf("failed to get %s value: %w", kind, err)
 		}
-		minutes = append(minutes, value)
+		values = append(values, value)
 	default:
 		return nil, fmt.Errorf("input (%s) is not valid", data)
 	}
 
-	return minutes, nil
+	return values, nil
 }
 
-func getMinuteValue(data string) (int, error) {
-	// check if minute data is a valid number
+func getValueInInterval(data string, minValue, maxValue int) (int, error) {
+	// check if data is a valid number
 	value, err := strconv.Atoi(data)
 	if err != nil {
-		return 0, fmt.Errorf("minute data (%s) is not a number", data)
+		return 0, fmt.Errorf("data (%s) is not a number", data)
 	}
-	// check if minute value is between 0 and 59
-	if value < 0 || value > 59 {
-		return 0, fmt.Errorf("minute value should be between 0-59. current given value is %d", value)
+	// check if value is between min and max
+	if value < minValue || value > maxValue {
+		return 0, fmt.Errorf("value should be between %d-%d. current given value is %d", minValue, maxValue, value)
 	}
 
 	return value, nil
