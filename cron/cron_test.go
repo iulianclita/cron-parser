@@ -70,7 +70,21 @@ func TestExtractValuesInInterval(t *testing.T) {
 			values:    []int{10, 20, 30},
 			wantError: false,
 		},
-		"input is of type x-y but z is not a number": {
+		"input is of type x-y-z but this is invaliud format": {
+			input:     "10-20-30",
+			min:       0,
+			max:       59,
+			values:    nil,
+			wantError: true,
+		},
+		"input is of type x-y but x is not a number": {
+			input:     "notANumber-10",
+			min:       0,
+			max:       59,
+			values:    nil,
+			wantError: true,
+		},
+		"input is of type x-y but y is not a number": {
 			input:     "10-notANumber",
 			min:       0,
 			max:       59,
@@ -79,6 +93,13 @@ func TestExtractValuesInInterval(t *testing.T) {
 		},
 		"input is of type x-y but z is not between min and max": {
 			input:     "10-99",
+			min:       0,
+			max:       59,
+			values:    nil,
+			wantError: true,
+		},
+		"input is of type x-y but y is smaller than x": {
+			input:     "15-10",
 			min:       0,
 			max:       59,
 			values:    nil,
@@ -93,6 +114,13 @@ func TestExtractValuesInInterval(t *testing.T) {
 		},
 		"input is not a valid number": {
 			input:     "xxx",
+			min:       0,
+			max:       59,
+			values:    nil,
+			wantError: true,
+		},
+		"input is not a valid number but not between min and max": {
+			input:     "99",
 			min:       0,
 			max:       59,
 			values:    nil,
